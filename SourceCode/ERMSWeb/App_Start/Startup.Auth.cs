@@ -10,12 +10,24 @@ using Microsoft.Owin.Security.OAuth;
 using Owin;
 using ERMSWeb.Providers;
 using ERMSWeb.Models;
+using System.Configuration;
 
 namespace ERMSWeb
 {
     public partial class Startup
     {
         public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
+
+        private int ExpireTimeSpan
+        {
+            get
+            {
+                var expireTimeSpanString = ConfigurationManager.AppSettings["ExpireTimeSpan"];
+                int expireTimeSpan;
+                Int32.TryParse(expireTimeSpanString, out expireTimeSpan);
+                return expireTimeSpan;
+            }
+        }
 
         public static string PublicClientId { get; private set; }
 
@@ -64,6 +76,20 @@ namespace ERMSWeb
             //    ClientId = "",
             //    ClientSecret = ""
             //});
+        }
+
+        public void ConfigureAuthentication(IAppBuilder app)
+        {
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+                LoginPath = new PathString("/Account/LogOn"),
+                ExpireTimeSpan = TimeSpan.FromMinutes(ExpireTimeSpan),
+                CookieName = "ERMS.ApiToken",
+                SlidingExpiration = true
+            });
+
+            app.MapSignalR();
         }
     }
 }
