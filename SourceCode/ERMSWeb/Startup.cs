@@ -12,7 +12,7 @@ namespace ERMSWeb
     {
         public void Configuration(IAppBuilder app)
         {
-            ConfigureAuth(app);
+            ConfigureAuthentication(app);
         }
     }
 }
